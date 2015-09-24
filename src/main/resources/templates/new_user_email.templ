@@ -1,0 +1,15 @@
+<html> 
+<head> 
+  <title>New User Registration</title> 
+</head>
+
+<body>  
+
+<P>Welcome, @{context.get('username')}!</P>
+
+<P>Please use the following URL to register: 
+ <a href="@{context.get('baseuri')}/passwdreset/@{context.get('uuid')}">Reset Password</a> 
+</P> 
+
+</body> 
+</html>

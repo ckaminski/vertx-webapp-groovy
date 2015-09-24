@@ -1,0 +1,97 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.1.1'
+    }
+}
+
+plugins { 
+  id 'java' 
+  id 'groovy' 
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '1.2.1' 
+}
+defaultTasks 'shadowJar'
+
+mainClassName = 'io.vertx.core.Starter'
+version = '1.0.0-SNAPSHOT'
+
+def mainClass    = 'com.darthcoder.webapp.WebappVerticle'
+def mainVerticle = 'groovy:' + mainClass
+def vertxVersion = '3.0.0'
+def groovyVersion = '2.4.3'
+
+
+if (!JavaVersion.current().java8Compatible) {
+    throw new IllegalStateException('''A Haiku:
+                                      |  This needs Java 8,
+                                      |  You are using something else,
+                                      |  Refresh. Try again.'''.stripMargin())
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url = 'http://oss.sonatype.org/content/repositories/snapshots/'
+    }
+}
+
+
+dependencies {
+    compile "org.hsqldb:hsqldb:2.3.2"
+    compile "org.postgresql:postgresql:9.3-1102-jdbc41"
+    compile "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile "io.vertx:vertx-core:$vertxVersion"
+    compile "io.vertx:vertx-lang-groovy:$vertxVersion"
+    compile "io.vertx:vertx-web:$vertxVersion"
+    compile "io.vertx:vertx-jdbc-client:$vertxVersion"
+    //compile "io.vertx:vertx-auth-service:$vertxVersion"
+    compile "io.vertx:vertx-auth-jdbc:$vertxVersion"
+    compile "io.vertx:vertx-mail-service:$vertxVersion"
+    //compile "io.vertx:vertx-ext:12"
+
+    // Should MVEL be runtime?
+    compile "org.mvel:mvel2:2.2.0.Final"
+}
+
+jar { 
+    manifest {
+        attributes 'Main-Verticle': mainVerticle
+    }
+}
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': mainVerticle
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+    dependencies {
+        exclude(dependency('io.vertx:codegen'))
+        exclude(dependency('junit:junit'))
+        exclude(dependency('org.mvel:mvel2'))
+        exclude(dependency('log4j:log4j'))
+    }
+}
+
+task(copyToRundir, dependsOn: 'shadowJar', type: Copy) { 
+  from 'server.jks'
+  from 'conf.json' 
+  into 'build/libs'
+}
+
+task(runVertx, dependsOn: ['shadowJar', 'copyToRundir'], type: JavaExec) { 
+  main = 'io.vertx.core.Starter'
+  workingDir = 'build/libs'
+  classpath = sourceSets.main.runtimeClasspath
+  args 'run', mainVerticle, '-conf', 'conf.json'
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+

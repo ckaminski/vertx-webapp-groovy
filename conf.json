@@ -1,0 +1,28 @@
+{ 
+    "http-config": {  
+    	"port": 8080, 
+    	"host": "localhost", 
+    	"ssl": true, 
+    	"keyStoreOptions": {
+    		"path": "server.jks",
+            "password": "wibbleWobble"
+    	}
+    },
+
+    "jdbc-config": {
+        "address"  : "com.ckaminski.webapp.persistor",
+        "url"      : "jdbc:postgresql://localhost/webapp",
+        "user"     : "",
+        "password" : ""
+    },
+    
+    "mail-config": {
+        "hostname": "smtp.gmail.com",
+        "port": 587, 
+        "starttls": "REQUIRED",
+        "username": "",
+        "password": ""
+    },
+
+    "cookie-secret": "asdf2121029381091829029lkjasdflj1poipa91i2"
+}
